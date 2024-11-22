@@ -1,0 +1,60 @@
+import { useState } from "react"
+import Todo_input from "./components/Todo_input"
+import Todo_List from "./components/Todo_List";
+import { z } from "zod";
+import Parameters from "./components/Parameters";
+
+export interface Todo {
+  id :number;
+  title : string;
+  completed : boolean;
+  tasks : string[];
+}
+
+export interface Options {
+  id:number;
+  title : string;
+  description?: string[];
+  column : string;
+  order : number;
+}
+
+export const schema = z.object({
+  message_input: z.string().min(1 , {
+    message: "Please enter a task"}).max(30 , {message : "Tasks must be less than 30 characters"}),
+})
+
+export type  Message_Input = z.infer<typeof schema>
+
+const App = () => {
+  const [todos, setTodos] = useState<Todo[]>([])
+  const [parameter, setParameter] = useState(false)
+
+  const [parameters, setParameters] = useState<Options>({id:0,title:"Help" , description:["..."] , column:"Test1" , order:0})
+
+  const addTask = (task : string) => {
+    setTodos([...todos, { id: todos.length, title: task, completed: false, tasks: [] }])
+  }
+
+  const open_Parameters = (id:number , title:string , description:string[] , column:string , order:number) => {
+    setParameter(!parameter)
+    setParameters({id,title , description , column , order})
+  }
+  
+  const update_Parameters = (id:number , title:string , description:string , column:string , order:number) => {
+    setParameter(!parameter)
+    setTodos(todos.map(todo => {...todo , title , description , column , order}))
+  }
+
+  return (
+    <div className="flex flex-wrap justify-start">
+      {todos.map((todo) => (
+        <Todo_List opener= {(id , title , description , column , order) => open_Parameters(id , title , description , column , order)} key={todo.id} title={todo.title} tasks={todo.tasks} />
+      ))}
+      {parameter && <Parameters parameters={parameters} />}
+      <Todo_input todos={todos} setTodos={addTask} />  
+    </div>
+  )
+}
+
+export default App

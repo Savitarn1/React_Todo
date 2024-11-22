@@ -1,0 +1,53 @@
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Message_Input, schema } from "../App";
+
+interface Props {
+  title: string;
+  tasks?: string[];
+  opener: (id:number , title:string , description:string[] , column:string , order) => void;
+}
+
+const Todo_List = ({ title, tasks = [], opener}: Props) => {
+
+  const { register, handleSubmit , reset , formState: { errors }} = useForm<Message_Input>({
+    resolver: zodResolver(schema),
+  })
+
+  return (
+    <form
+      onSubmit={handleSubmit((data) => {
+        tasks.push(data.message_input)
+        reset()
+      })}
+      className='mx-4 my-2 mb-auto bg-slate-100 py-3 px-2 w-96 rounded-md'
+    >
+      <div className='flex justify-between group align-center my-auto'>
+        <span className='font-bold text-lg uppercase text-slate-600 group-hover:text-slate-500'>
+          {title}
+        </span>
+        <div className='text-slate-400 text-lg'>{tasks.length}</div>
+      </div>
+
+        <div className="max-h-36 overflow-hidden hover:overflow-auto">
+        {tasks &&tasks.map((message , index) => 
+          <div key={index} onClick={() => opener()} className='cursor-pointer border border-slate-300 my-2 shadow-sm rounded-md px-2 py-1 w-full hover:text-slate-600 bg-white'>
+            {message}
+          </div>
+        )}
+        </div>
+        
+      
+      <input
+        {...register('message_input')}
+        type='text'
+        placeholder='New task'
+        className='border border-slate-300 mt-3 shadow-sm outline-none placeholder:text-slate-500 rounded-md py-1 px-2 w-full placeholder:hover:text-slate-400'
+      />
+      {errors.message_input && <span className="text-red-500">{errors.message_input.message}</span>}
+      <p className="cursor-pointer text-end pe-2 pt-1"><i className="fa-solid fa-trash"></i></p>
+    </form>
+)
+}
+
+export default Todo_List
